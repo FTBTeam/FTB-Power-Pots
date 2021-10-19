@@ -11,8 +11,8 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 def ENV = System.getenv()
 
-archivesBaseName = project.archives_base_name + "-build.${ENV.GITHUB_RUN_NUMBER ?: ENV.CI_PIPELINE_IID ?: 9999}"
-version = project.mod_version
+archivesBaseName = project.archives_base_name
+version = project.mod_version + "-build.${ENV.GITHUB_RUN_NUMBER ?: ENV.CI_PIPELINE_IID ?: 9999}"
 group = project.maven_group
 
 loom {

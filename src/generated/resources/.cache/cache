@@ -12,9 +12,7 @@ d9ccdf1070ec4a6952580695d62e9b5614fab829 assets/ftb-power-pots/models/item/power
 7068fd2ef2578949dbc534616bdad1146134161e assets/ftb-power-pots/models/item/power_pot_mk3.json
 dcdd4173d1a9d7774cf563e95048e3da6297bf2f assets/ftb-power-pots/models/item/power_pot_mk4.json
 00803cf936023d4e115c2dce7a2b6f8ecfd2debb data/botanypots/tags/blocks/botany_pots.json
-6a8f69f9a104f9aa31fb45ebf69d11465b33ddca data/ftb-power-pots/advancements/recipes/ftb-power-pots/power_pot_mk1.json
-545c058c2016af03f5da368f11b49cfbb5d7da6b data/ftb-power-pots/loot_tables/blocks/power_pot_mk1.json
-573dd9f1e06b482dd618f41ad5844799216fb449 data/ftb-power-pots/loot_tables/blocks/power_pot_mk2.json
-60a5e9a2ef8c02738c7839e4a0bf3b0c64f165e2 data/ftb-power-pots/loot_tables/blocks/power_pot_mk3.json
-7c149d273c8660e8ca19519550daa08b896b600a data/ftb-power-pots/loot_tables/blocks/power_pot_mk4.json
-f84eb0ff128bbc8b47e0571b40e3fbeb53c929d0 data/ftb-power-pots/recipes/power_pot_mk1.json
+7c149d273c8660e8ca19519550daa08b896b600a data/ftb-power-pots/loot_tables/blocks/power_pot_mk1.json
+60a5e9a2ef8c02738c7839e4a0bf3b0c64f165e2 data/ftb-power-pots/loot_tables/blocks/power_pot_mk2.json
+573dd9f1e06b482dd618f41ad5844799216fb449 data/ftb-power-pots/loot_tables/blocks/power_pot_mk3.json
+545c058c2016af03f5da368f11b49cfbb5d7da6b data/ftb-power-pots/loot_tables/blocks/power_pot_mk4.json

@@ -46,10 +46,10 @@ public class PowerPots {
     public static final RegistryObject<Block> POWER_POT_MK3 = BLOCKS.register("power_pot_mk3", () -> new PowerPotBlock(Config.POT_MK3));
     public static final RegistryObject<Block> POWER_POT_MK4 = BLOCKS.register("power_pot_mk4", () -> new PowerPotBlock(Config.POT_MK4));
 
-    public static final RegistryObject<Item> POWER_POT_MK4_ITEM = ITEMS.register("power_pot_mk4", () -> new BlockItem(POWER_POT_MK1.get(), new Item.Properties().tab(TAB)));
-    public static final RegistryObject<Item> POWER_POT_MK3_ITEM = ITEMS.register("power_pot_mk3", () -> new BlockItem(POWER_POT_MK2.get(), new Item.Properties().tab(TAB)));
-    public static final RegistryObject<Item> POWER_POT_MK2_ITEM = ITEMS.register("power_pot_mk2", () -> new BlockItem(POWER_POT_MK3.get(), new Item.Properties().tab(TAB)));
-    public static final RegistryObject<Item> POWER_POT_MK1_ITEM = ITEMS.register("power_pot_mk1", () -> new BlockItem(POWER_POT_MK4.get(), new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> POWER_POT_MK4_ITEM = ITEMS.register("power_pot_mk4", () -> new BlockItem(POWER_POT_MK4.get(), new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> POWER_POT_MK3_ITEM = ITEMS.register("power_pot_mk3", () -> new BlockItem(POWER_POT_MK3.get(), new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> POWER_POT_MK2_ITEM = ITEMS.register("power_pot_mk2", () -> new BlockItem(POWER_POT_MK2.get(), new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> POWER_POT_MK1_ITEM = ITEMS.register("power_pot_mk1", () -> new BlockItem(POWER_POT_MK1.get(), new Item.Properties().tab(TAB)));
 
     public static final RegistryObject<BlockEntityType<PowerPotTile>> POWER_TILE_MK1 = BLOCK_ENTITY.register("power_pot_tile_mk1", () -> BlockEntityType.Builder.of(() -> new PowerPotTile(Config.POT_MK1), POWER_POT_MK1.get()).build(null));
     public static final RegistryObject<BlockEntityType<PowerPotTile>> POWER_TILE_MK2 = BLOCK_ENTITY.register("power_pot_tile_mk2", () -> BlockEntityType.Builder.of(() -> new PowerPotTile(Config.POT_MK2), POWER_POT_MK2.get()).build(null));

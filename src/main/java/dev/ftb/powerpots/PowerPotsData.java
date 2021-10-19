@@ -116,15 +116,15 @@ public class PowerPotsData {
 
         @Override
         protected void buildShapelessRecipes(Consumer<FinishedRecipe> consumer) {
-            ShapedRecipeBuilder.shaped(PowerPots.POWER_POT_MK1_ITEM.get())
-                    .unlockedBy("has_item", has(BotanyPots.instance.getContent().basicBotanyPot))
-                    .group(PowerPots.MOD_ID + ":pot")
-                    .pattern("SSS")
-                    .pattern("SCS")
-                    .pattern("SSS")
-                    .define('S', Items.COBBLESTONE)
-                    .define('C', BotanyPots.instance.getContent().basicBotanyPot)
-                    .save(consumer);
+//            ShapedRecipeBuilder.shaped(PowerPots.POWER_POT_MK1_ITEM.get())
+//                    .unlockedBy("has_item", has(BotanyPots.instance.getContent().basicBotanyPot))
+//                    .group(PowerPots.MOD_ID + ":pot")
+//                    .pattern("SSS")
+//                    .pattern("SCS")
+//                    .pattern("SSS")
+//                    .define('S', Items.COBBLESTONE)
+//                    .define('C', BotanyPots.instance.getContent().basicBotanyPot)
+//                    .save(consumer);
         }
     }
 
