@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "ftb-power-pots:block/power_pot_mk4"
+    },
+    "facing=south": {
+      "model": "ftb-power-pots:block/power_pot_mk4",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "ftb-power-pots:block/power_pot_mk4",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "ftb-power-pots:block/power_pot_mk4",
+      "y": 90
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "ftb-power-pots:power_pot_mk1",
+    "ftb-power-pots:power_pot_mk2",
+    "ftb-power-pots:power_pot_mk3",
+    "ftb-power-pots:power_pot_mk4"
+  ]
+}

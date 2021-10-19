@@ -1,0 +1,7 @@
+{
+  "parent": "ftb-power-pots:block/power-pot",
+  "textures": {
+    "base": "ftb-power-pots:blocks/t4",
+    "particle": "ftb-power-pots:blocks/t4"
+  }
+}
