@@ -346,7 +346,7 @@ public class PowerPotTile extends TileEntityBotanyPot {
                 int energyAvailable = this.energy.consumeEnergy(this.tier.perTickEnergy.get(), true);
                 if (energyAvailable >= this.tier.perTickEnergy.get() && hasSpace) {
                     this.energy.consumeEnergy(this.tier.perTickEnergy.get(), false);
-                    this.currentGrowthTicks;
+                    //this.currentGrowthTicks += 50;
                 }
             }
         } else if (this.totalGrowthTicks != -1 || this.currentGrowthTicks != 0) {
