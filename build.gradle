@@ -178,11 +178,12 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             // add all the jars that should be included when publishing to maven
-            artifact(remapJar) {
-                builtBy remapJar
-            }
-            artifact(sourcesJar) {
-                builtBy remapSourcesJar
+            mavenJava(MavenPublication) {
+                artifact(remapJar) {
+                    builtBy remapJar
+                    artifactId = archivesBaseName
+                    classifier null
+                }
             }
         }
     }
