@@ -116,6 +116,7 @@ dependencies {
     modRuntimeOnly "curse.maven:refined-pipes-370696:3113506"
     modRuntimeOnly "curse.maven:pipez-443900:3491694"
     modRuntimeOnly "curse.maven:pretty-pipes-376737:3472990"
+    modRuntimeOnly "curse.maven:cooking-for-blockheads-231484:3445172"
     // at runtime, use the full JEI jar
 //    modRuntime "mezz.jei:jei-1.16.4:${jei_version}"
 }

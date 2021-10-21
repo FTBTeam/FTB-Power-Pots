@@ -3,7 +3,6 @@ package dev.ftb.powerpots.pot;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.darkhax.bookshelf.block.DisplayableBlockState;
 import net.darkhax.botanypots.BotanyPots;
-import net.darkhax.botanypots.block.tileentity.TileEntityBotanyPot;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -13,7 +12,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class PowerPotRender extends BlockEntityRenderer<PowerPotTile> {
+public class PowerPotRender extends BlockEntityRenderer<PowerPotTileBase> {
 
     private static final Direction[] SOIL_SIDES = new Direction[] { Direction.UP };
     private static final Direction[] CROP_SIDES = new Direction[] { Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST };
@@ -24,7 +23,7 @@ public class PowerPotRender extends BlockEntityRenderer<PowerPotTile> {
     }
 
     @Override
-    public void render(PowerPotTile tile, float partial, PoseStack matrix, MultiBufferSource buffer, int light, int overlay) {
+    public void render(PowerPotTileBase tile, float partial, PoseStack matrix, MultiBufferSource buffer, int light, int overlay) {
 
         if (tile.getSoil() != null && BotanyPots.CLIENT_CONFIG.shouldRenderSoil()) {
 

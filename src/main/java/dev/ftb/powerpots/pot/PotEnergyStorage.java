@@ -9,9 +9,9 @@ public class PotEnergyStorage implements IEnergyStorage, INBTSerializable<Compou
     private int energy;
     private final int capacity;
     private final int maxInOut;
-    private final PowerPotTile tile;
+    private final PowerPotTileBase tile;
 
-    public PotEnergyStorage(PowerPotTile tile, int capacity) {
+    public PotEnergyStorage(PowerPotTileBase tile, int capacity) {
         this.energy = 0;
         this.capacity = capacity;
         this.maxInOut = capacity;

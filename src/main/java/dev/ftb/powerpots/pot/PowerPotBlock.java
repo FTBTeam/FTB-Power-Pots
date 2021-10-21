@@ -1,6 +1,6 @@
 package dev.ftb.powerpots.pot;
 
-import dev.ftb.powerpots.Config;
+import dev.ftb.powerpots.PowerPots;
 import net.darkhax.botanypots.BotanyPotHelper;
 import net.darkhax.botanypots.block.BlockBotanyPot;
 import net.darkhax.botanypots.block.tileentity.TileEntityBotanyPot;
@@ -37,11 +37,11 @@ public class PowerPotBlock extends BlockBotanyPot {
     private final VoxelShape EAST = Stream.of(Block.box(4, 0, 4, 12, 1, 12), Block.box(12, 1, 3, 13, 6, 13), Block.box(3, 1, 3, 4, 6, 13), Block.box(4, 1, 12, 12, 6, 13), Block.box(4, 1, 3, 12, 6, 4), Block.box(5, 0, 2, 11, 2, 3), Block.box(5, 0, 3, 11, 1, 4), Block.box(5, 2, 2, 10, 4, 3)).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
     private final VoxelShape WEST = Stream.of(Block.box(4, 0, 4, 12, 1, 12), Block.box(3, 1, 3, 4, 6, 13), Block.box(12, 1, 3, 13, 6, 13), Block.box(4, 1, 3, 12, 6, 4), Block.box(4, 1, 12, 12, 6, 13), Block.box(5, 0, 13, 11, 2, 14), Block.box(5, 0, 12, 11, 1, 13), Block.box(6, 2, 13, 11, 4, 14)).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
 
-    private final Config.PotMkConfig tier;
+    private final PotTier tier;
 
-    public PowerPotBlock(Config.PotMkConfig tier) {
+    public PowerPotBlock(PotTier tile) {
         super(true);
-        this.tier = tier;
+        this.tier = tile;
 
         registerDefaultState(getStateDefinition().any().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
     }
@@ -230,10 +230,9 @@ public class PowerPotBlock extends BlockBotanyPot {
 
     @Override
     public BlockEntity createTileEntity(BlockState state, BlockGetter world) {
-        return new PowerPotTile(this.getTier());
-    }
-
-    public Config.PotMkConfig getTier() {
-        return tier;
+        if (this.tier == PotTier.MK1) return PowerPots.POWER_TILE_MK1.get().create();
+        if (this.tier == PotTier.MK2) return PowerPots.POWER_TILE_MK2.get().create();
+        if (this.tier == PotTier.MK3) return PowerPots.POWER_TILE_MK3.get().create();
+        return PowerPots.POWER_TILE_MK4.get().create();
     }
 }
