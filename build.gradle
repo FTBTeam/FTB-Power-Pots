@@ -78,34 +78,15 @@ repositories {
 }
 
 dependencies {
-    // to change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
 
-    // choose what mappings you want to use here
-    // leave this uncommented if you want to use mojang's official mappings
     mappings loom.layered() {
         officialMojangMappings()
         parchment("org.parchmentmc.data:parchment-1.16.5:2021.10.17")
     }
-    // uncomment this if you want to use yarn mappings
-    // mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 
-    // uncomment this if you want to use mcp mappings
-    // mappings "de.oceanlabs.mcp:mcp_${project.mcp_channel}:${project.mcp_mappings}"
-
-    // your forge dependency, this is **required** when using Forge Loom in forge mode!
     forge "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
 
-    // additional dependencies can be specified using loom's regular format
-    // specifying a "mod" dependency (like modImplementation or modApi)
-    // will cause loom to remap the file to your specified mappings
-
-    // in this example, we'll be adding JEI as a dependency
-    // according to their developer example on GitHub
-    // see: https://github.com/mezz/JustEnoughItems/wiki/Getting-Started
-    // compile against the JEI API but do not include it at runtime
-    // don't worry about loom "not finding a forge mod" here,
-    // JEI's api just doesn't have any class with an @Mod annotation
     modCompileOnly "curse.maven:botany-pots-353928:3283196"
     modCompileOnly "curse.maven:bookshelf-228525:3402183"
     modRuntimeOnly "curse.maven:botany-pots-353928:3272101"
@@ -117,8 +98,11 @@ dependencies {
     modRuntimeOnly "curse.maven:pipez-443900:3491694"
     modRuntimeOnly "curse.maven:pretty-pipes-376737:3472990"
     modRuntimeOnly "curse.maven:cooking-for-blockheads-231484:3445172"
-    // at runtime, use the full JEI jar
-//    modRuntime "mezz.jei:jei-1.16.4:${jei_version}"
+
+    modRuntimeOnly "curse.maven:the-one-probe-245211:3319255"
+
+    modCompileOnly "mezz.jei:jei-1.16.5:${jei_version}:api"
+    modRuntimeOnly "mezz.jei:jei-1.16.5:${jei_version}"
 }
 
 processResources {
