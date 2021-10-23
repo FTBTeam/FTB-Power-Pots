@@ -55,7 +55,12 @@ public class PowerPotBlock extends BlockBotanyPot {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, context.getHorizontalDirection().getOpposite());
+        BlockState state = super.getStateForPlacement(context);
+        if (state == null) {
+            state = defaultBlockState();
+        }
+
+        return state.setValue(BlockStateProperties.HORIZONTAL_FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override
@@ -134,8 +139,7 @@ public class PowerPotBlock extends BlockBotanyPot {
                         return InteractionResult.SUCCESS;
                     }
 
-                }
-                else {
+                } else {
                     final SoilInfo soil = pot.getSoil();
                     if (soil != null) {
                         final ItemStack soilStack = pot.getSoilStack();

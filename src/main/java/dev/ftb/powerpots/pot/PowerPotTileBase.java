@@ -251,7 +251,11 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
     public void resetGrowthTime() {
 
         // Recalculate total growth ticks to account for any data changes
-        this.totalGrowthTicks = BotanyPotHelper.getRequiredGrowthTicks(this.getCrop(), this.getSoil());
+        int requiredGrowthTicks = BotanyPotHelper.getRequiredGrowthTicks(this.getCrop(), this.getSoil());
+
+        this.totalGrowthTicks = requiredGrowthTicks - (int) (requiredGrowthTicks * this.tier.config.speedModifier.get());
+//        System.out.println(requiredGrowthTicks);
+//        System.out.println(requiredGrowthTicks - (requiredGrowthTicks * this.tier.config.speedModifier.get()));
 
         // Reset the growth time.
         this.currentGrowthTicks = 0;
@@ -336,7 +340,7 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
                 int energyAvailable = this.energy.consumeEnergy(this.tier.config.perTickEnergy.get(), true);
                 if (energyAvailable >= this.tier.config.perTickEnergy.get() && hasSpace) {
                     this.energy.consumeEnergy(this.tier.config.perTickEnergy.get(), false);
-                    this.currentGrowthTicks ++;
+                    this.currentGrowthTicks++;
                 }
             }
         } else if (this.totalGrowthTicks != -1 || this.currentGrowthTicks != 0) {
@@ -537,7 +541,9 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
 
                                 // Reset total growth ticks on tile load to account for data
                                 // changes.
-                                this.totalGrowthTicks = this.crop.getGrowthTicksForSoil(this.soil);
+                                
+                                int growthTicksForSoil = this.crop.getGrowthTicksForSoil(this.soil);
+                                this.totalGrowthTicks = growthTicksForSoil - (int) (growthTicksForSoil * this.tier.config.speedModifier.get());
                             } else {
 
                                 BotanyPots.LOGGER.error("Botany Pot at {} had a crop of type {} but that crop does not exist. The crop will be discarded.", this.worldPosition, rawCropId);
@@ -587,8 +593,7 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
     public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
         if (cap == CapabilityEnergy.ENERGY) {
             return energyLazy.cast();
-        }
-        else if (!this.isRemoved() && cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+        } else if (!this.isRemoved() && cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
             return inventoryLazy.cast();
         }
         return super.getCapability(cap, side);

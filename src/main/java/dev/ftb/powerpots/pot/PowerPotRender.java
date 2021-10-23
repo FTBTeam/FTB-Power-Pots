@@ -14,8 +14,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class PowerPotRender extends BlockEntityRenderer<PowerPotTileBase> {
 
-    private static final Direction[] SOIL_SIDES = new Direction[] { Direction.UP };
-    private static final Direction[] CROP_SIDES = new Direction[] { Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST };
+    private static final Direction[] SOIL_SIDES = new Direction[]{Direction.UP};
+    private static final Direction[] CROP_SIDES = new Direction[]{Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST};
 
     public PowerPotRender(BlockEntityRenderDispatcher dispatcher) {
 
@@ -40,10 +40,9 @@ public class PowerPotRender extends BlockEntityRenderer<PowerPotTileBase> {
             matrix.translate(0.5, 0.30, 0.5);
 
             if (BotanyPots.CLIENT_CONFIG.shouldDoGrowthAnimation()) {
-
                 final float partialOffset = tile.getCurrentGrowthTicks() < tile.getTotalGrowthTicks() ? partial : 0f;
                 final float progressScale = 0.25f + (tile.getCurrentGrowthTicks() + partialOffset) / tile.getTotalGrowthTicks() * 0.75f;
-                final float growth = Mth.clamp(progressScale * 0.55f, 0, .6f);
+                final float growth = Mth.clamp(progressScale * 0.55f, 0, 1.0F);
                 matrix.scale(growth, growth, growth);
             }
 

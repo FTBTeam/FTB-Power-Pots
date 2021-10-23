@@ -1,9 +1,15 @@
 package dev.ftb.powerpots;
 
-import dev.ftb.powerpots.pot.*;
+import dev.ftb.powerpots.pot.PotTier;
+import dev.ftb.powerpots.pot.PowerPotBlock;
+import dev.ftb.powerpots.pot.PowerPotRender;
+import dev.ftb.powerpots.pot.PowerPotTile;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.MinecraftForge;
@@ -62,14 +68,14 @@ public class PowerPots {
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.COMMON_CONFIG);
 
-
         MOD_BUS.addListener(this::commonSetup);
         MOD_BUS.addListener(this::clientSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event) {}
+    private void commonSetup(final FMLCommonSetupEvent event) {
+    }
 
     private void clientSetup(final FMLClientSetupEvent event) {
         ItemBlockRenderTypes.setRenderLayer(POWER_POT_MK1.get(), RenderType.cutout());
