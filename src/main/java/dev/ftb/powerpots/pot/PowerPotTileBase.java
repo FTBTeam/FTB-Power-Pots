@@ -322,6 +322,17 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
             return;
         }
 
+        if (hasInternalItems()) {
+            final IItemHandler foundInventory = InventoryUtils.getInventory(this.level, this.worldPosition.below(), Direction.UP);
+            if (foundInventory != EmptyHandler.INSTANCE) {
+                for (int i = 0; i < this.inventory.getSlots(); i++) {
+                    ItemStack stackInSlot = this.inventory.getStackInSlot(i);
+                    ItemStack itemStack = ItemHandlerHelper.insertItemStacked(foundInventory, stackInSlot, false);
+                    this.inventory.extractItem(i, stackInSlot.getCount() - itemStack.getCount(), false);
+                }
+            }
+        }
+
         if (this.hasSoilAndCrop()) {
             if (this.isDoneGrowing()) {
                 this.level.updateNeighbourForOutputSignal(this.worldPosition, this.getBlockState().getBlock());
@@ -359,6 +370,18 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
         return this.hasSoilAndCrop() && this.totalGrowthTicks > 0 && this.currentGrowthTicks >= this.totalGrowthTicks;
     }
 
+    private boolean hasInternalItems() {
+        boolean hasItems = false;
+        for (int i = 0; i < this.inventory.getSlots(); i++) {
+            if (!this.inventory.getStackInSlot(i).isEmpty()) {
+                hasItems = true;
+                break;
+            }
+        }
+
+        return hasItems;
+    }
+
     private void attemptAutoHarvest() {
         final Block block = this.getBlockState().getBlock();
         if (block instanceof BlockBotanyPot && ((BlockBotanyPot) block).isHopper()) {
@@ -374,14 +397,6 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
                 // Support for auto dumping into chests and other direct inventories that aren't pipes
                 if (foundInventory != EmptyHandler.INSTANCE) {
                     didAutoHarvest = extractToInventory(foundInventory);
-                    if (didAutoHarvest) {
-                        // try and empty the inventory, no reason to check, it's not worth it
-                        for (int i = 0; i < this.inventory.getSlots(); i++) {
-                            ItemStack stackInSlot = this.inventory.getStackInSlot(i);
-                            ItemStack itemStack = ItemHandlerHelper.insertItemStacked(foundInventory, stackInSlot, false);
-                            this.inventory.extractItem(i, stackInSlot.getCount() - itemStack.getCount(), false);
-                        }
-                    }
                 }
 
                 // If the above operation failed, use internal inventory for pipes
@@ -541,7 +556,7 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
 
                                 // Reset total growth ticks on tile load to account for data
                                 // changes.
-                                
+
                                 int growthTicksForSoil = this.crop.getGrowthTicksForSoil(this.soil);
                                 this.totalGrowthTicks = growthTicksForSoil - (int) (growthTicksForSoil * this.tier.config.speedModifier.get());
                             } else {

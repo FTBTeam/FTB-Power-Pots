@@ -42,7 +42,7 @@ public class PowerPotRender extends BlockEntityRenderer<PowerPotTileBase> {
             if (BotanyPots.CLIENT_CONFIG.shouldDoGrowthAnimation()) {
                 final float partialOffset = tile.getCurrentGrowthTicks() < tile.getTotalGrowthTicks() ? partial : 0f;
                 final float progressScale = 0.25f + (tile.getCurrentGrowthTicks() + partialOffset) / tile.getTotalGrowthTicks() * 0.75f;
-                final float growth = Mth.clamp(progressScale * 0.55f, 0, 1.0F);
+                float growth = tile.getCurrentGrowthTicks() == 0 ? 0.13f : Mth.clamp(progressScale * 0.55f, 0, 1.0F);
                 matrix.scale(growth, growth, growth);
             }
 
