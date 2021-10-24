@@ -52,7 +52,6 @@ public class PowerPotBlock extends BlockBotanyPot implements SimpleWaterloggedBl
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        super.createBlockStateDefinition(builder);
         builder.add(BlockStateProperties.HORIZONTAL_FACING, BlockStateProperties.WATERLOGGED);
     }
 
