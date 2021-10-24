@@ -16,11 +16,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -31,7 +35,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import javax.annotation.Nullable;
 import java.util.stream.Stream;
 
-public class PowerPotBlock extends BlockBotanyPot {
+public class PowerPotBlock extends BlockBotanyPot implements SimpleWaterloggedBlock {
     private final VoxelShape NORTH = Stream.of(Block.box(4, 0, 4, 12, 1, 12), Block.box(3, 1, 3, 13, 6, 4), Block.box(3, 1, 12, 13, 6, 13), Block.box(12, 1, 4, 13, 6, 12), Block.box(3, 1, 4, 4, 6, 12), Block.box(2, 0, 5, 3, 2, 11), Block.box(3, 0, 5, 4, 1, 11), Block.box(2, 2, 6, 3, 4, 11)).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
     private final VoxelShape SOUTH = Stream.of(Block.box(4, 0, 4, 12, 1, 12), Block.box(3, 1, 12, 13, 6, 13), Block.box(3, 1, 3, 13, 6, 4), Block.box(3, 1, 4, 4, 6, 12), Block.box(12, 1, 4, 13, 6, 12), Block.box(13, 0, 5, 14, 2, 11), Block.box(12, 0, 5, 13, 1, 11), Block.box(13, 2, 5, 14, 4, 10)).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
     private final VoxelShape EAST = Stream.of(Block.box(4, 0, 4, 12, 1, 12), Block.box(12, 1, 3, 13, 6, 13), Block.box(3, 1, 3, 4, 6, 13), Block.box(4, 1, 12, 12, 6, 13), Block.box(4, 1, 3, 12, 6, 4), Block.box(5, 0, 2, 11, 2, 3), Block.box(5, 0, 3, 11, 1, 4), Block.box(5, 2, 2, 10, 4, 3)).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
@@ -43,13 +47,13 @@ public class PowerPotBlock extends BlockBotanyPot {
         super(true);
         this.tier = tile;
 
-        registerDefaultState(getStateDefinition().any().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
+        registerDefaultState(getStateDefinition().any().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH).setValue(BlockStateProperties.WATERLOGGED, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(BlockStateProperties.HORIZONTAL_FACING);
+        builder.add(BlockStateProperties.HORIZONTAL_FACING, BlockStateProperties.WATERLOGGED);
     }
 
     @Nullable
@@ -60,7 +64,13 @@ public class PowerPotBlock extends BlockBotanyPot {
             state = defaultBlockState();
         }
 
-        return state.setValue(BlockStateProperties.HORIZONTAL_FACING, context.getHorizontalDirection().getOpposite());
+        return state.setValue(BlockStateProperties.WATERLOGGED, context.getLevel().getFluidState(context.getClickedPos()).getType() == Fluids.WATER).setValue(BlockStateProperties.HORIZONTAL_FACING, context.getHorizontalDirection().getOpposite());
+    }
+
+    @Override
+    @Deprecated
+    public FluidState getFluidState(BlockState state) {
+        return state.getValue(BlockStateProperties.WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 
     @Override
@@ -70,6 +80,15 @@ public class PowerPotBlock extends BlockBotanyPot {
         if (value == Direction.EAST) return EAST;
         if (value == Direction.SOUTH) return SOUTH;
         return WEST;
+    }
+
+    @Override
+    public BlockState updateShape(BlockState stateIn, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos currentPos, BlockPos neighborPos) {
+        if (stateIn.getValue(BlockStateProperties.WATERLOGGED)) {
+            level.getLiquidTicks().scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+        }
+
+        return super.updateShape(stateIn, direction, neighborState, level, currentPos, neighborPos);
     }
 
     @Override
