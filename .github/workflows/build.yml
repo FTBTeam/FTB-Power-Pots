@@ -3,7 +3,7 @@ name: Java CI
 # Made by max, modified by me
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       norelease:
