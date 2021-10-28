@@ -5,10 +5,10 @@ import net.darkhax.botanypots.BotanyPotHelper;
 import net.darkhax.botanypots.block.BlockBotanyPot;
 import net.darkhax.botanypots.block.tileentity.TileEntityBotanyPot;
 import net.darkhax.botanypots.crop.CropInfo;
-import net.darkhax.botanypots.fertilizer.FertilizerInfo;
 import net.darkhax.botanypots.soil.SoilInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -33,6 +33,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 import javax.annotation.Nullable;
+import java.util.Random;
 import java.util.stream.Stream;
 
 public class PowerPotBlock extends BlockBotanyPot implements SimpleWaterloggedBlock {
@@ -211,26 +212,6 @@ public class PowerPotBlock extends BlockBotanyPot implements SimpleWaterloggedBl
                             return InteractionResult.SUCCESS;
                         }
                     }
-                    // Attempt fertilizer.
-                    else if (!pot.canHarvest()) {
-                        final FertilizerInfo fertilizerForStack = BotanyPotHelper.getFertilizerForItem(heldItem);
-
-                        if (fertilizerForStack != null) {
-
-                            final int ticksToGrow = fertilizerForStack.getTicksToGrow(world.random, pot.getSoil(), pot.getCrop());
-                            pot.addGrowth(ticksToGrow);
-
-                            if (!world.isClientSide) {
-                                world.globalLevelEvent(2005, tile.getBlockPos(), 0);
-                            }
-
-                            if (!player.isCreative()) {
-                                heldItem.shrink(1);
-                            }
-
-                            return InteractionResult.SUCCESS;
-                        }
-                    }
                 }
 
                 // Check if the pot can be harvested
@@ -248,6 +229,21 @@ public class PowerPotBlock extends BlockBotanyPot implements SimpleWaterloggedBl
         }
 
         return InteractionResult.FAIL;
+    }
+
+    @Override
+    public boolean isBonemealSuccess(Level worldIn, Random rand, BlockPos pos, BlockState state) {
+        return false;
+    }
+
+    @Override
+    public void performBonemeal(ServerLevel world, Random random, BlockPos pos, BlockState myState) {
+
+    }
+
+    @Override
+    public boolean isValidBonemealTarget(BlockGetter worldIn, BlockPos pos, BlockState state, boolean isClient) {
+        return false;
     }
 
     @Override

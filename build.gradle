@@ -97,7 +97,8 @@ dependencies {
     modRuntimeOnly "curse.maven:refined-pipes-370696:3113506"
     modRuntimeOnly "curse.maven:pipez-443900:3491694"
     modRuntimeOnly "curse.maven:pretty-pipes-376737:3472990"
-    modRuntimeOnly "curse.maven:cooking-for-blockheads-231484:3445172"
+    modRuntimeOnly "curse.maven:mystical-agriculture-246640:3467262"
+    modRuntimeOnly "curse.maven:cucumber-272335:3507102"
 
     modRuntimeOnly "curse.maven:the-one-probe-245211:3319255"
 
