@@ -1,12 +1,11 @@
 package dev.ftb.powerpots.pot;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.energy.IEnergyStorage;
 
-public class PotEnergyStorage implements IEnergyStorage, INBTSerializable<CompoundTag> {
-    private static final String KEY = "energy";
+public class PotEnergyStorage implements IEnergyStorage {
     private int energy;
+
+    private boolean energyChanged;
     private final int capacity;
     private final int maxInOut;
     private final PowerPotTileBase tile;
@@ -19,25 +18,22 @@ public class PotEnergyStorage implements IEnergyStorage, INBTSerializable<Compou
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag tag = new CompoundTag();
-        tag.putInt(KEY, this.energy);
-        return tag;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        this.energy = nbt.getInt(KEY);
-    }
-
-    @Override
     public int receiveEnergy(int maxReceive, boolean simulate) {
-        int energyReceived = Math.min(capacity - energy, Math.min(this.maxInOut, maxReceive));
-
-        if (!simulate) {
-            energy += energyReceived;
-            this.tile.sync(false);
+        int energyReceived = Math.min(this.maxInOut, maxReceive);
+        int actuallyReceived;
+        if (energyReceived >= (actuallyReceived = capacity - energy)) {
+            if (!simulate) {
+                energy += actuallyReceived;
+            }
+            return actuallyReceived;
+        } else {
+            if (!simulate) {
+                energy += energyReceived;
+                energyChanged = true;
+                this.tile.sync(false);
+            }
         }
+
 
         return energyReceived;
     }
@@ -51,7 +47,7 @@ public class PotEnergyStorage implements IEnergyStorage, INBTSerializable<Compou
 
         if (!simulate) {
             energy -= energyExtracted;
-            this.tile.sync(false);
+            energyChanged = true;
         }
 
         return energyExtracted;
@@ -61,6 +57,14 @@ public class PotEnergyStorage implements IEnergyStorage, INBTSerializable<Compou
     @Override
     public int extractEnergy(int maxExtract, boolean simulate) {
         return 0;
+    }
+
+    public boolean getEnergyChanged() {
+        return this.energyChanged;
+    }
+
+    public void setEnergyChanged(boolean changed) {
+        this.energyChanged = changed;
     }
 
     @Override
