@@ -26,6 +26,8 @@ jobs:
           distribution: 'temurin'
           java-version: 16
           cache: 'gradle'
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         env:
