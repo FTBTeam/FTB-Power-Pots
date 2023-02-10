@@ -69,8 +69,9 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
     /**
      * A useless inventory used to allow other blocks to visually connect to the botany pot.
      */
-    private InternalInventoryHandler inventory;
+    private final InternalInventoryHandler inventory;
     private final LazyOptional<InternalInventoryHandler> inventoryLazy;
+    private boolean inventoryChanged;
 
     private final PotEnergyStorage energy;
     private final LazyOptional<PotEnergyStorage> energyLazy;
@@ -80,7 +81,7 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
      */
     @Nullable
     private SoilInfo soil;
-
+    private boolean soilChanged;
     private ItemStack soilStack = ItemStack.EMPTY;
 
     /**
@@ -88,7 +89,7 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
      */
     @Nullable
     private CropInfo crop;
-
+    private boolean cropChanged;
     private ItemStack cropStack = ItemStack.EMPTY;
 
     /**
@@ -101,6 +102,8 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
      */
     private int currentGrowthTicks;
 
+    private boolean growthTicksChanged;
+
     /**
      * A cooldown for the auto harvest.
      */
@@ -111,7 +114,7 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
      */
     private ChunkPos chunkPos;
 
-    private PotTier tier;
+    private final PotTier tier;
 
     public PowerPotTileBase(PotTier tier) {
         super();
@@ -148,19 +151,48 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
     public void setSoil(@Nullable SoilInfo newSoil, ItemStack stack) {
         this.soil = newSoil;
         this.soilStack = stack;
+        this.soilChanged = true;
         this.resetGrowthTime();
 
-        if (!this.level.isClientSide) {
-
+        if (!this.level.isClientSide()) {
             this.sync(false);
             this.level.getChunkSource().getLightEngine().checkBlock(this.worldPosition);
         }
     }
 
     @Override
+    public CompoundTag getUpdateTag() {
+        CompoundTag tag = super.getUpdateTag();
+        this.serialize(tag);
+        return tag;
+    }
+
+    @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
         super.onDataPacket(net, packet);
         this.level.getLightEngine().checkBlock(this.worldPosition);
+    }
+
+    @Override
+    public CompoundTag save(CompoundTag dataTag) {
+        if (this.soil != null) {
+            dataTag.putString("Soil", this.soil.getId().toString());
+            dataTag.put("SoilStack", this.soilStack.serializeNBT());
+        } else {
+            dataTag.putString("Soil", "");
+        }
+
+        if (this.crop != null) {
+            dataTag.putString("Crop", this.crop.getId().toString());
+            dataTag.put("CropStack", this.cropStack.serializeNBT());
+        } else {
+            dataTag.putString("Crop", "");
+        }
+
+        dataTag.putInt("GrowthTicks", this.currentGrowthTicks);
+        inventoryLazy.ifPresent(e -> dataTag.put("inventory", e.serializeNBT()));
+        energyLazy.ifPresent(e -> dataTag.putInt("energy", e.getEnergyStored()));
+        return super.save(dataTag);
     }
 
     /**
@@ -187,6 +219,7 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
 
         this.crop = newCrop;
         this.cropStack = stack;
+        this.cropChanged = true;
         this.resetGrowthTime();
 
         if (!this.level.isClientSide) {
@@ -259,7 +292,7 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
 
         // Reset the growth time.
         this.currentGrowthTicks = 0;
-
+        this.growthTicksChanged = true;
         // To help deal with desyncs caused by reload, every reset will also reset the
         // cached
         // soila and crop references.
@@ -301,10 +334,6 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
         if (this.currentGrowthTicks > this.totalGrowthTicks) {
             this.currentGrowthTicks = this.totalGrowthTicks;
         }
-
-        if (!this.level.isClientSide) {
-            this.sync(false);
-        }
     }
 
     @Override
@@ -319,6 +348,21 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
     @Override
     public void onTileTick() {
         if (this.level.isClientSide) {
+            if (this.hasSoilAndCrop()) {
+                if (!this.canHarvest()) {
+                    boolean hasSpace = false;
+                    for (int i = 0; i < this.inventory.getSlots(); i++) {
+                        if (this.inventory.getStackInSlot(i).isEmpty()) {
+                            hasSpace = true;
+                            break;
+                        }
+                    }
+                    int energyAvailable = this.energy.consumeEnergy(this.tier.config.perTickEnergy.get(), true);
+                    if (energyAvailable >= this.tier.config.perTickEnergy.get() && hasSpace) {
+                        this.currentGrowthTicks++;
+                    }
+                }
+            }
             return;
         }
 
@@ -413,9 +457,11 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
                             }
                         }
                     }
+                    inventoryChanged = true;
                 }
 
                 if (didAutoHarvest) {
+                    growthTicksChanged = true;
                     this.onCropHarvest();
                     this.resetGrowthTime();
                 }
@@ -489,99 +535,116 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
 
     @Override
     public void serialize(CompoundTag dataTag) {
-
-        if (this.soil != null) {
-
-            dataTag.putString("Soil", this.soil.getId().toString());
-
-            // Crop is only saved if there is a soil
-            if (this.crop != null) {
-
-                dataTag.putString("Crop", this.crop.getId().toString());
-
-                // Tick info is only saved if there is a crop and a soil.
-                dataTag.putInt("GrowthTicks", this.currentGrowthTicks);
+        if (this.soilChanged) {
+            this.soilChanged = false;
+            if (this.soil != null) {
+                dataTag.putString("Soil", this.soil.getId().toString());
+                dataTag.put("SoilStack", this.soilStack.serializeNBT());
+            } else {
+                dataTag.putString("Soil", "");
             }
         }
 
-        // This is stupid but I'm lazy
-        energyLazy.ifPresent(e -> dataTag.putInt("energy", e.serializeNBT().getInt("energy")));
-        inventoryLazy.ifPresent(e -> dataTag.put("inventory", e.serializeNBT()));
+        if (this.cropChanged) {
+            this.cropChanged = false;
+            if (this.crop != null) {
+                dataTag.putString("Crop", this.crop.getId().toString());
+                dataTag.put("CropStack", this.cropStack.serializeNBT());
+            } else {
+                dataTag.putString("Crop", "");
+            }
+        }
 
-        dataTag.put("CropStack", this.cropStack.serializeNBT());
-        dataTag.put("SoilStack", this.soilStack.serializeNBT());
+        if (this.growthTicksChanged) {
+            this.growthTicksChanged = false;
+            dataTag.putInt("GrowthTicks", this.currentGrowthTicks);
+        }
+
+        if (this.inventoryChanged) {
+            this.inventoryChanged = false;
+            inventoryLazy.ifPresent(e -> dataTag.put("inventory", e.serializeNBT()));
+        }
+
+        energyLazy.ifPresent(e -> {
+            if (e.getEnergyChanged()) {
+                e.setEnergyChanged(false);
+                dataTag.putInt("energy", e.getEnergyStored());
+            }
+        });
     }
+
 
     @Override
     public void deserialize(CompoundTag dataTag) {
-        this.soil = null;
-        this.crop = null;
-
-        energyLazy.ifPresent(e -> e.deserializeNBT(dataTag));
-        inventoryLazy.ifPresent(e -> e.deserializeNBT(dataTag));
-
-        if (dataTag.contains("CropStack")) {
-
-            this.cropStack = ItemStack.of(dataTag.getCompound("CropStack"));
-        }
-
-        if (dataTag.contains("SoilStack")) {
-
-            this.soilStack = ItemStack.of(dataTag.getCompound("SoilStack"));
-        }
-
         if (dataTag.contains("Soil")) {
-
-            final String rawSoilId = dataTag.getString("Soil");
-            final ResourceLocation soilId = ResourceLocation.tryParse(rawSoilId);
-
-            if (soilId != null) {
-
-                final SoilInfo foundSoil = BotanyPotHelper.getSoil(soilId);
-
-                if (foundSoil != null) {
-
-                    this.soil = foundSoil;
-
-                    // Crops are only loaded if the soil exists.
-                    if (dataTag.contains("Crop")) {
-
-                        final String rawCropId = dataTag.getString("Crop");
-                        final ResourceLocation cropId = ResourceLocation.tryParse(rawCropId);
-
-                        if (cropId != null) {
-
-                            final CropInfo cropInfo = BotanyPotHelper.getCrop(cropId);
-
-                            if (cropInfo != null) {
-
-                                this.crop = cropInfo;
-
-                                // Growth ticks are only loaded if a crop and soil exist.
-                                this.currentGrowthTicks = dataTag.getInt("GrowthTicks");
-
-                                // Reset total growth ticks on tile load to account for data
-                                // changes.
-
-                                int growthTicksForSoil = this.crop.getGrowthTicksForSoil(this.soil);
-                                this.totalGrowthTicks = growthTicksForSoil - (int) (growthTicksForSoil * this.tier.config.speedModifier.get());
-                            } else {
-
-                                BotanyPots.LOGGER.error("Botany Pot at {} had a crop of type {} but that crop does not exist. The crop will be discarded.", this.worldPosition, rawCropId);
-                            }
-                        } else {
-
-                            BotanyPots.LOGGER.error("Botany Pot at {} has an invalid crop Id of {}. The crop will be discarded.", this.worldPosition, rawCropId);
+            this.soil = null;
+            String rawSoilId = dataTag.getString("Soil");
+            if (rawSoilId.isEmpty()) {
+                this.soil = null;
+                this.soilStack = null;
+            } else {
+                final ResourceLocation soilId = ResourceLocation.tryParse(rawSoilId);
+                if (soilId != null) {
+                    final SoilInfo foundSoil = BotanyPotHelper.getSoil(soilId);
+                    if (foundSoil != null) {
+                        this.soil = foundSoil;
+                        if (dataTag.contains("SoilStack")) {
+                            this.soilStack = ItemStack.of(dataTag.getCompound("SoilStack"));
                         }
+                    } else {
+                        BotanyPots.LOGGER.error("Botany Pot at {} had a soil of type {} which no longer exists. Soil and crop will be discarded.", this.worldPosition, rawSoilId);
                     }
                 } else {
-
-                    BotanyPots.LOGGER.error("Botany Pot at {} had a soil of type {} which no longer exists. Soil and crop will be discarded.", this.worldPosition, rawSoilId);
+                    BotanyPots.LOGGER.error("Botany Pot at {} has invalid soil type {}. Soil and crop will be discarded.", this.worldPosition, rawSoilId);
                 }
-            } else {
-
-                BotanyPots.LOGGER.error("Botany Pot at {} has invalid soil type {}. Soil and crop will be discarded.", this.worldPosition, rawSoilId);
             }
+        }
+
+        // Crops are only loaded if the soil exists.
+        if (dataTag.contains("Crop")) {
+            this.crop = null;
+            String rawCropId = dataTag.getString("Crop");
+            if (rawCropId.isEmpty()) {
+                this.crop = null;
+                this.cropStack = null;
+            } else {
+                final ResourceLocation cropId = ResourceLocation.tryParse(rawCropId);
+                if (cropId != null) {
+
+                    final CropInfo cropInfo = BotanyPotHelper.getCrop(cropId);
+
+                    if (cropInfo != null) {
+                        this.crop = cropInfo;
+                        if (dataTag.contains("CropStack")) {
+
+                            this.cropStack = ItemStack.of(dataTag.getCompound("CropStack"));
+                        }
+                        if (this.soil != null) {
+                            int growthTicksForSoil = this.crop.getGrowthTicksForSoil(this.soil);
+                            this.totalGrowthTicks = growthTicksForSoil - (int) (growthTicksForSoil * this.tier.config.speedModifier.get());
+                        }
+                    } else {
+                        BotanyPots.LOGGER.error("Botany Pot at {} had a crop of type {} but that crop does not exist. The crop will be discarded.", this.worldPosition, rawCropId);
+                    }
+                } else {
+                    BotanyPots.LOGGER.error("Botany Pot at {} has an invalid crop Id of {}. The crop will be discarded.", this.worldPosition, rawCropId);
+                }
+            }
+        }
+
+        energyLazy.ifPresent(e -> {
+            if (dataTag.contains("energy")) {
+                e.setEnergy(dataTag.getInt("energy"));
+            }
+        });
+
+        if (dataTag.contains("inventory")) {
+            inventoryLazy.ifPresent(e -> e.deserializeNBT(dataTag.getCompound("inventory")));
+        }
+
+        if (dataTag.contains("GrowthTicks")) {
+            // Growth ticks are only loaded if a crop and soil exist.
+            this.currentGrowthTicks = dataTag.getInt("GrowthTicks");
         }
     }
 
