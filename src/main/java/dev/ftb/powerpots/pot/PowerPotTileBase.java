@@ -403,12 +403,13 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
                 if (!didAutoHarvest) {
                     for (final ItemStack item : BotanyPotHelper.generateDrop(this.level.random, this.getCrop())) {
                         item.setCount(this.tier.config.itemsPerOutput.get());
+                        // it's possible for item.getCount() to be >64 at this point, so this could insert multiple stacks
 
-                        for (int i = 0; i < this.inventory.getSlots(); i++) {
-                            ItemStack itemStack = this.inventory.internalInsertItem(i, item, false);
-                            if (itemStack.isEmpty()) {
+                        for (int i = 0; i < this.inventory.getSlots() && !item.isEmpty(); i++) {
+                            ItemStack itemStack = this.inventory.internalInsertItem(i, item.copy(), false);
+                            if (itemStack.getCount() < item.getCount()) {
+                                item.setCount(itemStack.getCount());
                                 didAutoHarvest = true;
-                                break;
                             }
                         }
                     }
@@ -439,26 +440,31 @@ public class PowerPotTileBase extends TileEntityBotanyPot {
 
     public static boolean extractItemsToInventory(IItemHandler inventory, ItemStack item) {
         boolean didInsert = false;
+
+        // it's possible for item.getCount() to be >64 at this point, so this could insert multiple stacks
+
         for (int slot = 0; slot < inventory.getSlots(); slot++) {
-            // Check if the simulated insert stack can be accepted into the
-            // inventory.
-            if (inventory.isItemValid(slot, item) && (inventory.insertItem(slot, item, true).getCount() != item.getCount() || (inventory instanceof InternalInventoryHandler && ((InternalInventoryHandler) inventory).internalInsertItem(slot, item, true).getCount() != item.getCount()))) {
-                // Actually insert the stack.
-                // Insert the items. We don't care about the remainder and
-                // it can be safely voided.
+            // Check if the simulated insert stack can be accepted into the inventory.
+            if (inventory.isItemValid(slot, item) && (inventory.insertItem(slot, item, true).getCount() != item.getCount()
+                    || inventory instanceof InternalInventoryHandler && ((InternalInventoryHandler) inventory).internalInsertItem(slot, item, true).getCount() != item.getCount())) {
+                // Insert the items. We don't care about the remainder, and it can be safely voided.
+                ItemStack excess;
                 if (inventory instanceof InternalInventoryHandler) {
-                    ((InternalInventoryHandler) inventory).internalInsertItem(slot, item, false);
+                    excess = ((InternalInventoryHandler) inventory).internalInsertItem(slot, item.copy(), false);
                 } else {
-                    inventory.insertItem(slot, item, false);
+                    excess = inventory.insertItem(slot, item.copy(), false);
                 }
 
-                // Set auto harvest to true. This will cause a reset for
-                // the next growth cycle.
-                didInsert = true;
+                if (excess.getCount() < item.getCount()) {
+                    // Set auto harvest to true. This will cause a reset for the next growth cycle.
+                    didInsert = true;
+                    item.setCount(excess.getCount());
+                }
 
-                // Exit the inventory for this loop. Will then move on to
-                // the next item and start over.
-                break;
+                if (excess.isEmpty()) {
+                    // Exit the inventory for this loop. Will then move on to the next item and start over.
+                    break;
+                }
             }
         }
         return didInsert;
